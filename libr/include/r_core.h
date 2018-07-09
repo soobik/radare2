@@ -737,6 +737,12 @@ typedef struct r_core_task_t {
 
 typedef void (*RCoreTaskOneShot)(void *);
 
+typedef struct r_core_task_oneshot_compact_t {
+	RCore *core;
+	RCoreTaskOneShot func;
+	void *user;
+} RCoreTaskOneShotCompact;
+
 R_API RCoreTask *r_core_task_get(RCore *core, int id);
 R_API void r_core_task_print(RCore *core, RCoreTask *task, int mode);
 R_API void r_core_task_list(RCore *core, int mode);
@@ -745,6 +751,8 @@ R_API RCoreTask *r_core_task_new(RCore *core, bool create_cons, const char *cmd,
 R_API void r_core_task_free(RCoreTask *task);
 R_API void r_core_task_enqueue(RCore *core, RCoreTask *task);
 R_API void r_core_task_enqueue_oneshot(RCore *core, RCoreTaskOneShot func, void *user);
+RCoreTaskOneShotCompact *r_core_task_oneshot_compact_new(RCore *core, RCoreTaskOneShot func, void *user);
+R_API void r_core_task_enqueue_oneshot_compact(RCoreTaskOneShotCompact *oneshot);
 R_API int r_core_task_run_sync(RCore *core, RCoreTask *task);
 R_API void r_core_task_sync_begin(RCore *core);
 R_API void r_core_task_sync_end(RCore *core);

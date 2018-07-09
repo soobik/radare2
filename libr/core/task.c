@@ -334,6 +334,24 @@ R_API void r_core_task_enqueue_oneshot(RCore *core, RCoreTaskOneShot func, void 
 	r_th_lock_leave (core->tasks_lock);
 }
 
+RCoreTaskOneShotCompact *r_core_task_oneshot_compact_new(RCore *core, RCoreTaskOneShot func, void *user) {
+	RCoreTaskOneShotCompact *oneshot = R_NEW (RCoreTaskOneShotCompact);
+	if (!oneshot) {
+		return NULL;
+	}
+	oneshot->core = core;
+	oneshot->func = func;
+	oneshot->user = user;
+}
+
+R_API void r_core_task_enqueue_oneshot_compact(RCoreTaskOneShotCompact *oneshot) {
+	if (!oneshot) {
+		return;
+	}
+	r_core_task_enqueue_oneshot (oneshot->core, oneshot->func, oneshot->user);
+	free (oneshot);
+}
+
 R_API int r_core_task_run_sync(RCore *core, RCoreTask *task) {
 	task->thread = NULL;
 	return task_run (task);
