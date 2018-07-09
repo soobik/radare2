@@ -3165,8 +3165,9 @@ dodo:
 		if (wheel) {
 			r_cons_enable_mouse (true);
 		}
-		core->cons->event_data = core;
-		core->cons->event_resize = (RConsEvent) visual_refresh;
+		core->cons->event_resize = NULL; // avoid running old event with new data
+		core->cons->event_data = r_core_task_oneshot_compact_new (core, (RCoreTaskOneShot) visual_refresh, core);
+		core->cons->event_resize = (RConsEvent) r_core_task_enqueue_oneshot_compact;
 		flags = core->print->flags;
 		color = r_config_get_i (core->config, "scr.color");
 		if (color) {

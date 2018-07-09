@@ -2409,9 +2409,14 @@ static ut64 r_core_visual_anal_refresh (RCore *core) {
 R_API void r_core_visual_anal(RCore *core) {
 	char old[218];
 	int nfcns, ch, _option = 0;
+
 	RConsEvent olde = core->cons->event_resize;
-	core->cons->event_resize = (RConsEvent) r_core_visual_anal_refresh;
-	core->cons->event_data = (void *) core;
+	void *olde_user = core->cons->event_data;
+
+	core->cons->event_resize = NULL; // avoid running old event with new data
+	core->cons->event_data = r_core_task_oneshot_compact_new (core, (RCoreTaskOneShot) r_core_visual_anal_refresh, core);
+	core->cons->event_resize = (RConsEvent) r_core_task_enqueue_oneshot_compact;
+
 	level = 0;
 	addr = core->offset;
 
@@ -2645,6 +2650,8 @@ R_API void r_core_visual_anal(RCore *core) {
 		}
 	}
 beach:
+	core->cons->event_resize = NULL; // avoid running old event with new data
+	core->cons->event_data = olde_user;
 	core->cons->event_resize = olde;
 	level = 0;
 	r_config_set_i (core->config, "asm.bytes", asmbytes);

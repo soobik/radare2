@@ -203,8 +203,9 @@ static void panelPrint(RCore *core, RConsCanvas *can, RPanel *panel, int color) 
 		}
 		if (!strcmp (panel->title, PANEL_TITLE_GRAPH)) {
 			graph_pad = 1;
-			core->cons->event_data = core;
-			core->cons->event_resize = (RConsEvent) doPanelsRefresh;
+			core->cons->event_resize = NULL; // avoid running old event with new data
+			core->cons->event_data = r_core_task_oneshot_compact_new (core, (RCoreTaskOneShot) doPanelsRefresh, core);
+			core->cons->event_resize = (RConsEvent) r_core_task_enqueue_oneshot_compact;
 		}
 		if (delta_y < 0) {
 			delta_y = 0;
@@ -1321,8 +1322,9 @@ R_API int r_core_visual_panels(RCore *core, RPanels *panels) {
 	r_core_panels_layout (panels);
 repeat:
 	core->panels = panels;
-	core->cons->event_data = core;
-	core->cons->event_resize = (RConsEvent) doPanelsRefresh;
+	core->cons->event_resize = NULL; // avoid running old event with new data
+	core->cons->event_data = r_core_task_oneshot_compact_new (core, (RCoreTaskOneShot) doPanelsRefresh, core);
+	core->cons->event_resize = (RConsEvent) r_core_task_enqueue_oneshot_compact;
 	r_core_panels_layout_refresh (core);
 	wheel = r_config_get_i (core->config, "scr.wheel");
 	if (wheel) {
