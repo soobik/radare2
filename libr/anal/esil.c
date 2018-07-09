@@ -2893,6 +2893,11 @@ R_API int r_anal_esil_parse(RAnalEsil *esil, const char *str) {
 	if (!esil || !str || !*str) {
 		return 0;
 	}
+	if (*str == '!') {
+		if (esil->anal && esil->anal->coreb.setab) {
+			esil->anal->coreb.cmd (esil->anal->coreb.core, str + 1);
+		}
+	}
 	esil->trap = 0;
 	if (esil->cmd && esil->cmd_todo) {
 		if (!strncmp (str, "TODO", 4)) {
